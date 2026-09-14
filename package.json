@@ -1,9 +1,9 @@
 {
   "name": "pos-generator-desktop",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "private": true,
   "description": "App nativa Windows per Pos Generator — wrapper Electron con gate Windows Hello attorno alla web app esistente.",
-  "author": "Pos Generator",
+  "author": "Nicolò N.",
   "main": "src/main.js",
   "scripts": {
     "dev": "electron .",
