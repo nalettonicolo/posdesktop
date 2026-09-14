@@ -66,6 +66,12 @@ successivo — nessun popup, nessuna azione richiesta. Meccanismo: `electron-upd
 `build.publish` in `package.json` (provider GitHub, repository pubblico), wired in
 [`src/main.js`](src/main.js).
 
+Oltre al controllo automatico esiste anche un pulsante **"Verifica aggiornamenti"** nella
+web app (area Amministrazione e Impostazioni) per forzarlo subito invece di aspettare il
+prossimo avvio/sblocco — visibile solo quando la pagina è caricata dentro questa app
+desktop (`window.posDesktop`, esposto da [`src/preload-content.js`](src/preload-content.js)),
+mai sul sito normale.
+
 **Per pubblicare una nuova versione**: alzare `version` in `package.json` prima di fare
 push (o eseguire `npm run release` a mano da un PC Windows con `GH_TOKEN` impostato —
 pubblica direttamente, senza passare dalla Action). Se la versione non viene alzata, il

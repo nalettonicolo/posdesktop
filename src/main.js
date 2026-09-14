@@ -216,6 +216,50 @@ ipcMain.handle("hello:request", async () => {
 
 ipcMain.on("app:quit", () => app.quit());
 
+ipcMain.handle("app:version", () => app.getVersion());
+
+// Verifica manuale ("Verifica aggiornamenti" nell'area admin/impostazioni della
+// web app — vedi preload-content.js): stesso autoUpdater del controllo
+// automatico in background, solo innescato a richiesta invece che solo
+// all'avvio/sblocco. Risolve con un esito serializzabile (mai l'oggetto
+// UpdateCheckResult grezzo, che può contenere valori non passabili via IPC)
+// ascoltando UNA VOLTA i tre eventi che autoUpdater può emettere in risposta.
+ipcMain.handle("updates:check", async () => {
+  if (!app.isPackaged) {
+    return { status: "dev", message: "Verifica aggiornamenti non disponibile in sviluppo (electron .)." };
+  }
+
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = (result) => {
+      if (settled) return;
+      settled = true;
+      autoUpdater.removeListener("update-available", onAvailable);
+      autoUpdater.removeListener("update-not-available", onNotAvailable);
+      autoUpdater.removeListener("error", onError);
+      resolve(result);
+    };
+    const onAvailable = (info) => finish({ status: "available", version: info?.version ?? null });
+    const onNotAvailable = (info) => finish({ status: "not-available", version: info?.version ?? null });
+    const onError = (err) => finish({ status: "error", message: err?.message || String(err) });
+
+    autoUpdater.once("update-available", onAvailable);
+    autoUpdater.once("update-not-available", onNotAvailable);
+    autoUpdater.once("error", onError);
+
+    autoUpdater
+      .checkForUpdates()
+      .catch((err) => finish({ status: "error", message: err?.message || String(err) }));
+
+    // Non lasciare mai il pulsante in caricamento all'infinito (es. rete lenta
+    // o proxy aziendale che non fa mai arrivare una risposta).
+    setTimeout(
+      () => finish({ status: "error", message: "Nessuna risposta dal server di aggiornamento (timeout)." }),
+      20000,
+    );
+  });
+});
+
 // Auto-update: ogni push su desktop/** su main pubblica una nuova release GitHub (vedi
 // .github/workflows/desktop-release.yml + build.publish in package.json). L'app già
 // installata la trova da sola, la scarica in background e la installa al prossimo
