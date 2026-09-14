@@ -1,0 +1,36 @@
+name: Build e pubblica release Windows
+
+# Build automatica dell'app a ogni push su main, pubblicata come GitHub Release
+# (installer .exe + metadati per l'auto-update — vedi src/main.js e build.publish
+# in package.json). Le copie già installate trovano da sole la nuova release e si
+# aggiornano in background.
+#
+# Nota: electron-builder pubblica una release taggata sulla versione in
+# package.json. Se la versione non viene alzata, la release esistente viene
+# semplicemente risovrascritta con gli stessi asset — nessun errore, ma nessun
+# aggiornamento arriva alle copie già installate (electron-updater confronta le
+# versioni). Alzare "version" in package.json a ogni modifica che si vuole
+# distribuire.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm ci
+
+      - run: npm run release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

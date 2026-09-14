@@ -1,0 +1,56 @@
+{
+  "name": "pos-generator-desktop",
+  "version": "0.1.3",
+  "private": true,
+  "description": "App nativa Windows per Pos Generator — wrapper Electron con gate Windows Hello attorno alla web app esistente.",
+  "author": "Pos Generator",
+  "main": "src/main.js",
+  "scripts": {
+    "dev": "electron .",
+    "build": "electron-builder --win nsis",
+    "release": "electron-builder --win nsis --publish always"
+  },
+  "dependencies": {
+    "electron-updater": "^6.3.9"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.0"
+  },
+  "build": {
+    "appId": "com.posgenerator.desktop",
+    "productName": "Pos Generator",
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "build/icon.ico",
+        "to": "icon.ico"
+      }
+    ],
+    "asarUnpack": [
+      "src/windows-hello.ps1"
+    ],
+    "directories": {
+      "output": "release"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "nalettonicolo",
+      "repo": "posdesktop",
+      "releaseType": "release"
+    }
+  }
+}
